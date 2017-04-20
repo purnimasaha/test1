@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+        http://www.springframework.org/schema/security
+	    http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+        
+	<context:component-scan base-package="com.mpa.service" />
+	<mvc:annotation-driven />
+    <context:annotation-config />
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/mpav3"/>
+		<property name="username" value="root"/>
+		<property name="password" value="root"/>
+	</bean>
+	
+	<bean id="properties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+   	<property name="locations">
+      	<list><value>/WEB-INF/service.properties</value></list>
+   	</property>
+	</bean>
+	 <context:property-placeholder location="/WEB-INF/service.properties"/>
+	 
+	<security:http realm="localhost" auto-config="true" create-session="never" use-expressions="false" entry-point-ref="restAuthenticationEntryPoint">
+		<security:http-basic/>
+		<security:csrf disabled="true"/>
+		<security:anonymous enabled='false'/>
+		<security:intercept-url pattern="/**" access="ROLE_USER" />
+		<security:form-login authentication-success-forward-url="mySuccessHandler" authentication-failure-forward-url="myFailureHandler"/>
+	</security:http>
+	<bean id="mySuccessHandler"
+      class="org.rest.security.MySavedRequestAwareAuthenticationSuccessHandler"/>
+   <bean id="myFailureHandler" class=
+     "org.springframework.security.web.authentication.SimpleUrlAuthenticatio"/>
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<security:user-service>
+				<security:user name="purnima" password="purnima" authorities="ROLE_USER" />
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+  </beans>
